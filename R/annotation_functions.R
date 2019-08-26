@@ -199,3 +199,59 @@ replace_ctab <- function(object, new_ctab, labelcol, RGBAcols, ...){
 
   return(object)
 }
+
+
+#' Get vertex labels
+#' Simplified version of replace_ctab
+#' @export
+get_vertex_labels <- function(object, new_ctab=NULL, labelcol=NULL, RGBAcols=NULL, ...){
+
+  staticnames <- c("vtxct", "vertex_data", "tag", "ctab_version", "maxstruc", "len", "fname", "num_entries", "LUT")
+
+  if(class(object) != "annotation_construct"){
+    warning("Object structure is not of class 'annotation_construct'")
+  }
+  if(!identical(names(object),staticnames)){
+    warning("Object structure does not match regular structure of class 'annotation_construct'")
+  }
+
+
+  if (!is.null(new_ctab)){
+    if (length(RGBAcols) != 4){
+      stop("RGBAcols should be 4 items long")
+    }
+
+    names(new_ctab)[names(new_ctab) == labelcol] <- "labelname"
+    new_ctab$labelname <- as.character(new_ctab$labelname)
+
+    new_RGBAcols <- c("red", "green", "blue", "transp")
+    for (i in 1:length(RGBAcols)) names(new_ctab)[names(new_ctab) == RGBAcols[i]] = new_RGBAcols[i]
+  }
+
+
+
+  # Labelnames to vertices using vertex labels
+  orig_ctabcols <- colnames(object$LUT)
+  object$LUT$vlabel <-  ((object$LUT$blue * 256^2) + (object$LUT$green * 256) + object$LUT$red )
+  colnames(object$vertex_data) <- c("vno", "vlabel")
+  object$vertex_data <- merge(object$vertex_data, object$LUT[c("vlabel", "labelname")], all.x = TRUE)
+
+  if (!is.null(new_ctab)){
+    # Link new vertexlabels to labelnames
+    new_ctab$vlabel_new <-  as.integer((new_ctab$blue * 256^2) + (new_ctab$green * 256) + new_ctab$red )
+    new_ctab[new_ctab$transp == 128L, "vlabel_new"] <- 2147483647L
+    object$vertex_data <-  merge(object$vertex_data, new_ctab[c("labelname", "vlabel_new")],
+                                 by = "labelname", all.x = TRUE )
+    object$vertex_data <-  object$vertex_data[order(object$vertex_data$vno),]
+
+    object$vertex_data[is.na(object$vertex_data$vlabel_new), "vlabel_new"] <-
+      object$vertex_data[is.na(object$vertex_data$vlabel_new), "vlabel"]
+
+    object$vertex_data <- as.matrix(object$vertex_data[, c("vno", "vlabel_new")])
+  }
+
+
+  return(object$vertex_data)
+}
+
+
