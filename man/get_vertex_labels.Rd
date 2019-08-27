@@ -2,13 +2,11 @@
 % Please edit documentation in R/annotation_functions.R
 \name{get_vertex_labels}
 \alias{get_vertex_labels}
-\title{Get vertex labels
-Simplified version of replace_ctab}
+\title{Get vertex labels}
 \usage{
 get_vertex_labels(object, new_ctab = NULL, labelcol = NULL,
   RGBAcols = NULL, ...)
 }
 \description{
-Get vertex labels
 Simplified version of replace_ctab
 }

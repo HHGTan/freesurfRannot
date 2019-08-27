@@ -202,7 +202,9 @@ replace_ctab <- function(object, new_ctab, labelcol, RGBAcols, ...){
 
 
 #' Get vertex labels
+#'
 #' Simplified version of replace_ctab
+#'
 #' @export
 get_vertex_labels <- function(object, new_ctab=NULL, labelcol=NULL, RGBAcols=NULL, ...){
 
